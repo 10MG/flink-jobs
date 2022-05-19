@@ -398,9 +398,9 @@ data.sync.columns.convert=BIGINT,TIMESTAMP:TO_TIMESTAMP(FROM_UNIXTIME(#columnNam
 
 上述配置旨在将`BIGINT`类型表示的时间转换为`TIMESTAMP`类型的时间，同时减去8个小时（时区转换，Debezium的时间通常是UTC时间）转换为北京时间。该配置包含几层含义：
 
-1. 如果没有指明同步的列信息，且开启智能模式（配置`data.sync.smart=true`），则从目标库中加载元数据，确定列名并自动将JDBC类型对应到Flink SQL的类型上，并作为创建目标表（`Sink`表）的依据。当某列的类型为`TIMESTAMP`时，会在同步时应用该转换函数。此时，其源表对应列的类型则为`BIGINT`，否则源表对应列的类型和目标表（`Sink`表）的一致；列名方面，默认源表对应列名和目标表（`Sink`表）列名一致。最后根据列的相关信息生成并执行相关同步SQL。
+1. 如果没有指明同步的列信息，且开启智能模式（配置`data.sync.smart=true`）时，则从目标库中加载元数据，确定列名并自动将JDBC类型对应到Flink SQL的类型上，并作为创建目标表（Sink Table）的依据。当某列的类型为`TIMESTAMP`时，会在同步时应用该转换函数。此时，其源表对应列的类型则为`BIGINT`，否则源表对应列的类型和目标表（Sink Table）的一致；列名方面，默认源表对应列名和目标表（Sink Table）列名一致。最后根据列的相关信息生成并执行相关同步SQL。
 
-2. 如果部分指定了同步的列信息，且开启智能模式（配置`data.sync.smart=true`），则从目标库中加载元数据，并自动补全用户未配置的部分列信息后，再生成并执行相关同步SQL。
+2. 如果指定了部分同步的列信息，且开启智能模式（配置`data.sync.smart=true`）时，则从目标库中加载元数据，并自动补全用户未配置的部分列信息后，再生成并执行相关同步SQL。
 
 3. 如果完全指明同步的列信息，则根据指定的信息分别生成并执行相关同步SQL。
 
@@ -409,6 +409,8 @@ data.sync.columns.convert=BIGINT,TIMESTAMP:TO_TIMESTAMP(FROM_UNIXTIME(#columnNam
 ```
 data.sync.columns.convert=BIGINT,TIMESTAMP:TO_TIMESTAMP(FROM_UNIXTIME(#columnName/1000 - 8*60*60, 'yyyy-MM-dd HH:mm:ss'));INT,DATE:TO_TIMESTAMP(FROM_UNIXTIME(#columnName/1000 - 8*60*60, 'yyyy-MM-dd HH:mm:ss'))
 ```
+
+示例2则在示例1的基础之上，增加了INT类型日期的自动转换配置（使用Debezium时，通常会把日期转换成`INT`类型，因此同步时需要重新转换为`DATE`类型）。
 
 #### data.sync.timestamp.case_sensitive
 
